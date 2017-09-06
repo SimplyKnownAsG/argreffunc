@@ -23,23 +23,68 @@ namespace arf {
         };
     };
 
+    class ArgIterator {
+    private:
+        int _position;
+
+        std::vector<std::string> arguments;
+
+    public:
+        ArgIterator(std::vector<std::string> arguments)
+          : arguments(arguments) {
+            this->_position = -1;
+        };
+
+        ArgIterator(int argc, char* argv[])
+          : arguments(argv + 1, argv + argc) {
+            this->_position = -1;
+        };
+
+        bool next() {
+            return ++_position < this->arguments.size();
+        };
+
+        const std::string& current() const {
+            return this->arguments.at(this->_position);
+        };
+    };
+
     class Arg {
     public:
+        const std::string name;
+
         Arg(std::string name)
           : name(name){};
-        const std::string name;
-        virtual void parse(std::istream& stream) = 0;
+
+        void parse(std::istream& stream) {
+            this->_parse(stream);
+            if (stream.bad()) {
+                std::ostringstream err_msg;
+                err_msg << "Failed to parse `" << this->name << "`, stream state is bad.";
+                throw ArfException(err_msg.str());
+            }
+            if (!stream.eof()) {
+                std::ostringstream err_msg;
+                err_msg << "Failed to parse `" << this->name << "`, not at end of stream.";
+                throw ArfException(err_msg.str());
+            }
+        };
+
+    protected:
+        virtual void _parse(std::istream& stream) = 0;
     };
 
     template<typename T>
     class RefArg : public Arg {
-    public:
+    private:
         T& val;
+
+    public:
         RefArg(const std::string name, T& arg)
           : Arg(name)
           , val(arg){};
 
-        void parse(std::istream& stream) override {
+        void _parse(std::istream& stream) override {
             stream >> this->val;
         }
     };
@@ -51,7 +96,7 @@ namespace arf {
         FuncArg(const std::string name, std::function<void(T)> func)
           : Arg(name)
           , func(func){};
-        void parse(std::istream& stream) override {
+        void _parse(std::istream& stream) override {
             T value;
             stream >> value;
             this->func(value);
@@ -62,7 +107,75 @@ namespace arf {
     private:
         std::vector<Arg*> args;
 
+        std::vector<Arg*> positional_args;
+
+        void _parse(ArgIterator& iterator, std::vector<Arg*>::iterator& positional) {
+            while (iterator.next()) {
+                if (iterator.current()[0] == '-') {
+                    if (iterator.current()[1] == '-') {
+                        this->_parse_long(iterator);
+                    } else {
+                        this->_parse_short(iterator);
+                    }
+                } else {
+                    this->_parse_positional(iterator, positional);
+                }
+            }
+            if (positional != this->positional_args.end()) {
+                std::ostringstream err_msg;
+                err_msg << "too few positional arguments.";
+                throw ArfException(err_msg.str());
+            }
+        };
+
+        void _parse_long(ArgIterator& iterator) {
+            bool success = false;
+            for (auto a : this->args) {
+                /* 2 after leading "--" */
+                if (iterator.current().find(a->name) == 2) {
+                    success = true;
+                    std::istringstream stream(iterator.current().substr(2));
+                    a->parse(stream);
+                    break;
+                }
+            }
+            if (!success) {
+                std::ostringstream err_msg;
+                err_msg << "unrecognized argument: `" << iterator.current() << "`.";
+                throw ArfException(err_msg.str());
+            }
+        };
+
+        void _parse_short(ArgIterator& iterator){};
+
+        void _parse_positional(ArgIterator& iterator, std::vector<Arg*>::iterator& positional) {
+            if (positional == this->positional_args.end()) {
+                std::ostringstream err_msg;
+                err_msg << "too many positional arguments: `" << iterator.current() << "`.";
+                throw ArfException(err_msg.str());
+            }
+
+            Arg* arg = *positional;
+            std::istringstream stream(iterator.current());
+            arg->parse(stream);
+            positional++;
+        };
+
     public:
+        template<typename T>
+        Parser& add_positional(std::string name, T& refval) {
+            auto arg = new RefArg<T>(name, refval);
+            this->positional_args.push_back(arg);
+            return *this;
+        };
+
+        template<typename T>
+        Parser& add_positional(std::string name, std::function<void(T)> refval) {
+            auto arg = new FuncArg<T>(name, refval);
+            this->positional_args.push_back(arg);
+            return *this;
+        };
+
         template<typename T>
         Parser& add(std::string name, T& refval) {
             auto arg = new RefArg<T>(name, refval);
@@ -78,21 +191,15 @@ namespace arf {
         };
 
         void parse(int argc, char* argv[]) {
-            for (int ii = 1; ii < argc; ii++) {
-                auto arg = this->args.at(ii - 1);
-                std::istringstream stream(argv[ii]);
-                arg->parse(stream);
-                if (stream.bad()) {
-                    std::ostringstream msg;
-                    msg << "Failed to parse `" << arg->name << "`, stream state is bad.";
-                    throw ArfException(msg.str());
-                }
-                if (!stream.eof()) {
-                    std::ostringstream msg;
-                    msg << "Failed to parse `" << arg->name << "`, not at end of stream.";
-                    throw ArfException(msg.str());
-                }
-            }
+            ArgIterator iterator(argc, argv);
+            std::vector<Arg*>::iterator positional = this->positional_args.begin();
+            this->_parse(iterator, positional);
+        };
+
+        void parse(std::vector<std::string> args) {
+            ArgIterator iterator(args);
+            std::vector<Arg*>::iterator positional = this->positional_args.begin();
+            this->_parse(iterator, positional);
         };
     };
 }
