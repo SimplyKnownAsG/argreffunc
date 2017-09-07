@@ -21,9 +21,9 @@ TEST_CASE("optional", "[optional]") {
     parser.add("second", float_val);
     parser.add("third", func);
 
-    SECTION("positional 12") {
+    SECTION("optional 12") {
         int argc = 3;
-        char* argv[] = { "program", "--first", "12" };
+        char* argv[] = { (char*)"program", (char*)"--first", (char*)"12" };
 
         parser.parse(argc, argv);
 
@@ -31,7 +31,7 @@ TEST_CASE("optional", "[optional]") {
         REQUIRE(float_val == 0.0f);
         REQUIRE(sc.member_dubs == 0.0);
     }
-    SECTION("positional=12") {
+    SECTION("optional=12") {
         std::vector<std::string> argv = { "--second=99.12" };
 
         parser.parse(argv);
@@ -40,7 +40,7 @@ TEST_CASE("optional", "[optional]") {
         REQUIRE(float_val == 99.12f);
         REQUIRE(sc.member_dubs == 0.0);
     }
-    SECTION("positional:12 fails") {
+    SECTION("optional:12 fails") {
         std::vector<std::string> argv = { "--second:99.12" };
 
         REQUIRE_THROWS_AS(parser.parse(argv), arf::ArfException);

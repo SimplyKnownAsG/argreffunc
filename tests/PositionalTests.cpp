@@ -23,7 +23,7 @@ TEST_CASE("positional", "[positional]") {
 
     SECTION("success with argc argv") {
         int argc = 4;
-        char* argv[] = { "program", "12", "11.11", "99e99" };
+        char* argv[] = { (char*)"program", (char*)"12", (char*)"11.11", (char*)"99e99" };
 
         parser.parse(argc, argv);
 
