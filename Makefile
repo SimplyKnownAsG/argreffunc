@@ -26,9 +26,8 @@ else
 	BUILD_DIR=release
 endif
 
-HEADER_LIST:=$(PROJECT)/$(PROJECT).hpp
 TEST_MACROS_HEADER:=$(SRC_DIR)/catch.hpp
-AUTO_FILES:=$(HEADER_LIST) $(TEST_MACROS_HEADER)
+AUTO_FILES:=$(TEST_MACROS_HEADER)
 
 SRC = $(filter-out $(AUTO_FILES),$(call rwildcard, $(SRC_DIR), *.cpp))
 HEADERS = $(filter-out $(AUTO_FILES), $(call rwildcard, $(SRC_DIR), *.hpp))
@@ -53,11 +52,6 @@ clobber:
 	-$(RM) $(AUTO_FILES)
 	-git clean -fxd --exclude .vscode/
 
-$(HEADER_LIST): $(HEADERS)
-	@echo "// this file is auto-generated, do not modify" > $@
-	@$(foreach hpp,$^,echo '#include "$(hpp)"' >> $@;)
-	@echo "" >> $@
-
 test: test_cpp
 
 test_cpp: $(CPP_TEST_EXEC) | $(TEST_MACROS_HEADER)
@@ -66,10 +60,10 @@ test_cpp: $(CPP_TEST_EXEC) | $(TEST_MACROS_HEADER)
 $(CPP_TEST_EXEC): $(CPP_TEST_OBJ) | $(TEST_MACROS_HEADER)
 	$(call colorecho,$(LDEXE) $(filter-out $(PROJECT)/$(PROJECT).hpp,$^) $(CLANG_LD_FLAGS))
 
-$(OBJ_DIR)/%.obj: %.cpp %.hpp | $(TARGET_DIRS)
+$(OBJ_DIR)/%.obj: %.cpp %.hpp $(SRC) $(HEADERS) | $(TARGET_DIRS)
 	$(call colorecho,$(CXX) $(CXXFLAGS))
 
-$(OBJ_DIR)/%.obj: %.cpp | $(TARGET_DIRS)
+$(OBJ_DIR)/%.obj: %.cpp $(SRC) $(HEADERS) | $(TARGET_DIRS)
 	$(call colorecho,$(CXX) $(CXXFLAGS))
 
 documentation: apidoc

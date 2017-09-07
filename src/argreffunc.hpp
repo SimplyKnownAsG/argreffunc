@@ -56,7 +56,7 @@ namespace arf {
         Arg(std::string name)
           : name(name){};
 
-        void parse(std::istream& stream) {
+        void parse(std::istringstream& stream) {
             this->_parse(stream);
             if (stream.bad()) {
                 std::ostringstream err_msg;
@@ -65,7 +65,8 @@ namespace arf {
             }
             if (!stream.eof()) {
                 std::ostringstream err_msg;
-                err_msg << "Failed to parse `" << this->name << "`, not at end of stream.";
+                err_msg << "Failed to parse `" << this->name
+                        << "`, not at end of stream: " << stream.str();
                 throw ArfException(err_msg.str());
             }
         };
@@ -134,7 +135,23 @@ namespace arf {
                 /* 2 after leading "--" */
                 if (iterator.current().find(a->name) == 2) {
                     success = true;
-                    std::istringstream stream(iterator.current().substr(2));
+                    std::istringstream stream;
+                    if (iterator.current().size() == a->name.size() + 2) {
+                        iterator.next();
+                        stream = std::istringstream(iterator.current());
+                    } else if (iterator.current().size() > a->name.size() + 2) {
+                        if (iterator.current()[a->name.size() + 2] != '=') {
+                            std::ostringstream err_msg;
+                            err_msg << "expected `=` sign after argument `" << a->name
+                                    << "`, but got:" << iterator.current() << "`.";
+                            throw ArfException(err_msg.str());
+                        }
+                        stream = std::istringstream(iterator.current().substr(3 + a->name.size()));
+                    } else {
+                        std::ostringstream err_msg;
+                        err_msg << "I don't understand how this happened.";
+                        throw ArfException(err_msg.str());
+                    }
                     a->parse(stream);
                     break;
                 }
