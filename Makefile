@@ -72,5 +72,5 @@ apidoc: $(HEADERS) $(patsubst %.py,%.log,$(call rwildcard,examples,*.py))
 	$(call colorecho,doxygen doxyconf)
 
 $(TEST_MACROS_HEADER):
-	$(call colorecho,wget https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp -O $@)
+	$(call colorecho,wget https://raw.githubusercontent.com/catchorg/Catch2/master/single_include/catch2/catch.hpp -O $@)
 

@@ -56,3 +56,29 @@ TEST_CASE("optional", "[optional]") {
         REQUIRE(sc.member_dubs == 99e99);
     }
 }
+
+TEST_CASE("multi-alias", "[optional]") {
+    arf::Parser parser;
+    std::string thing = "";
+    parser.add("thing1", thing).add_alias("thing2", "t");
+    std::vector<std::string> argv;
+
+    SECTION("first alias") {
+        argv.push_back("--thing1=bacon");
+    }
+    SECTION("second alias") {
+        argv.push_back("--thing1=bacon");
+    }
+    SECTION("short alias no equal") {
+        argv.push_back("-tbacon");
+    }
+    SECTION("short alias with equal") {
+        argv.push_back("-t=bacon");
+    }
+    SECTION("short alias with space") {
+        argv.push_back("-t");
+        argv.push_back("bacon");
+    }
+    parser.parse(argv);
+    REQUIRE(thing == "bacon");
+}

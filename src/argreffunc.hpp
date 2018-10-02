@@ -1,3 +1,4 @@
+#pragma once
 
 #include <functional>
 #include <istream>
@@ -12,10 +13,10 @@ namespace arf {
         std::string _message;
 
     public:
-        ArfException(const std::string& message)
+        explicit ArfException(const std::string& message)
           : _message(message){};
 
-        ArfException(const char* message)
+        explicit ArfException(const char* message)
           : _message(message){};
 
         const char* what() const noexcept override {
@@ -30,7 +31,7 @@ namespace arf {
         std::vector<std::string> arguments;
 
     public:
-        ArgIterator(std::vector<std::string> arguments)
+        explicit ArgIterator(std::vector<std::string> arguments)
           : arguments(arguments) {
             this->_position = -1;
         };
@@ -51,24 +52,41 @@ namespace arf {
 
     class Arg {
     public:
-        const std::string name;
+        std::vector<std::string> names;
 
-        Arg(std::string name)
-          : name(name){};
+        std::vector<std::string> aliases;
+
+        explicit Arg(std::string name) {
+            this->names.push_back(name);
+        };
 
         void parse(std::istringstream& stream) {
             this->_parse(stream);
             if (stream.bad()) {
                 std::ostringstream err_msg;
-                err_msg << "Failed to parse `" << this->name << "`, stream state is bad.";
+                err_msg << "Failed to parse `" << this->names[0] << "`, stream state is bad.";
                 throw ArfException(err_msg.str());
             }
             if (!stream.eof()) {
                 std::ostringstream err_msg;
-                err_msg << "Failed to parse `" << this->name
+                err_msg << "Failed to parse `" << this->names[0]
                         << "`, not at end of stream: " << stream.str();
                 throw ArfException(err_msg.str());
             }
+        };
+
+        void add_alias(std::string alias) {
+            if (alias.size() == 1) {
+                this->aliases.push_back(alias);
+            } else {
+                this->names.push_back(alias);
+            }
+        };
+
+        template<typename... Alias>
+        void add_alias(std::string alias, Alias... aliases) {
+            this->add_alias(alias);
+            this->add_alias(aliases...);
         };
 
     protected:
@@ -92,11 +110,14 @@ namespace arf {
 
     template<typename T>
     class FuncArg : public Arg {
-    public:
+    private:
         std::function<void(T)> func;
+
+    public:
         FuncArg(const std::string name, std::function<void(T)> func)
           : Arg(name)
           , func(func){};
+
         void _parse(std::istream& stream) override {
             T value;
             stream >> value;
@@ -122,6 +143,7 @@ namespace arf {
                     this->_parse_positional(iterator, positional);
                 }
             }
+
             if (positional != this->positional_args.end()) {
                 std::ostringstream err_msg;
                 err_msg << "too few positional arguments.";
@@ -133,29 +155,38 @@ namespace arf {
             bool success = false;
             for (auto a : this->args) {
                 /* 2 after leading "--" */
-                if (iterator.current().find(a->name) == 2) {
-                    success = true;
-                    std::istringstream stream;
-                    if (iterator.current().size() == a->name.size() + 2) {
-                        iterator.next();
-                        stream = std::istringstream(iterator.current());
-                    } else if (iterator.current().size() > a->name.size() + 2) {
-                        if (iterator.current()[a->name.size() + 2] != '=') {
+                for (const auto& name : a->names) {
+                    if (iterator.current().find(name) == 2) {
+                        success = true;
+                        std::istringstream stream;
+
+                        if (iterator.current().size() == name.size() + 2) {
+                            iterator.next();
+                            stream = std::istringstream(iterator.current());
+                        } else if (iterator.current().size() > name.size() + 2) {
+                            if (iterator.current()[name.size() + 2] != '=') {
+                                std::ostringstream err_msg;
+                                err_msg << "expected `=` sign after argument `" << name
+                                        << "`, but got:" << iterator.current() << "`.";
+                                throw ArfException(err_msg.str());
+                            }
+                            stream = std::istringstream(iterator.current().substr(3 + name.size()));
+                        } else {
                             std::ostringstream err_msg;
-                            err_msg << "expected `=` sign after argument `" << a->name
-                                    << "`, but got:" << iterator.current() << "`.";
+                            err_msg << "I don't understand how this happened.";
                             throw ArfException(err_msg.str());
                         }
-                        stream = std::istringstream(iterator.current().substr(3 + a->name.size()));
-                    } else {
-                        std::ostringstream err_msg;
-                        err_msg << "I don't understand how this happened.";
-                        throw ArfException(err_msg.str());
+
+                        a->parse(stream);
+                        break;
                     }
-                    a->parse(stream);
+                }
+
+                if (success) {
                     break;
                 }
             }
+
             if (!success) {
                 std::ostringstream err_msg;
                 err_msg << "unrecognized argument: `" << iterator.current() << "`.";
@@ -163,7 +194,48 @@ namespace arf {
             }
         };
 
-        void _parse_short(ArgIterator& iterator){};
+        void _parse_short(ArgIterator& iterator) {
+            bool success = false;
+            for (auto a : this->args) {
+                /* 1 after leading "-" */
+                for (const auto& name : a->aliases) {
+                    if (iterator.current().find(name) == 1) {
+                        success = true;
+                        std::istringstream stream;
+
+                        if (iterator.current().size() == name.size() + 1) {
+                            iterator.next();
+                            stream = std::istringstream(iterator.current());
+                        } else if (iterator.current().size() > name.size() + 1) {
+                            if (iterator.current()[name.size() + 1] == '=') {
+                                stream =
+                                  std::istringstream(iterator.current().substr(2 + name.size()));
+                            } else {
+                                stream =
+                                  std::istringstream(iterator.current().substr(1 + name.size()));
+                            }
+                        } else {
+                            std::ostringstream err_msg;
+                            err_msg << "I don't understand how this happened.";
+                            throw ArfException(err_msg.str());
+                        }
+
+                        a->parse(stream);
+                        break;
+                    }
+                }
+
+                if (success) {
+                    break;
+                }
+            }
+
+            if (!success) {
+                std::ostringstream err_msg;
+                err_msg << "unrecognized argument: `" << iterator.current() << "`.";
+                throw ArfException(err_msg.str());
+            }
+        };
 
         void _parse_positional(ArgIterator& iterator, std::vector<Arg*>::iterator& positional) {
             if (positional == this->positional_args.end()) {
@@ -194,10 +266,10 @@ namespace arf {
         };
 
         template<typename T>
-        Parser& add(std::string name, T& refval) {
+        Arg& add(std::string name, T& refval) {
             auto arg = new RefArg<T>(name, refval);
             this->args.push_back(arg);
-            return *this;
+            return *arg;
         };
 
         template<typename T>
