@@ -1,8 +1,16 @@
-==========
-argreffunc
-==========
+::
 
-``argreffunc`` is c++ header and source file for globbing files and directories.
+                               __  __                  
+                              / _|/ _|                 
+      __ _ _ __ __ _ _ __ ___| |_| |_ _   _ _ __   ___ 
+     / _` | '__/ _` | '__/ _ \  _|  _| | | | '_ \ / __|
+    | (_| | | | (_| | | |  __/ | | | | |_| | | | | (__ 
+     \__,_|_|  \__, |_|  \___|_| |_|  \__,_|_| |_|\___|
+                __/ |                                  
+               |___/                                   
+
+
+``argreffunc`` is a c++ library for parsing command line arguments.
 
 .. image:: https://travis-ci.org/SimplyKnownAsG/argreffunc.svg?branch=master
     :target: https://travis-ci.org/SimplyKnownAsG/argreffunc

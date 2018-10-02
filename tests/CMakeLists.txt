@@ -17,8 +17,11 @@ target_include_directories(arf_tests
                 ${CMAKE_BINARY_DIR}/3rd-party/include)
 
 # the ctest thing is far too complicated...
-add_custom_command(
-        TARGET arf_tests
-        POST_BUILD
+add_test(NAME arf_tests
+         COMMAND $<TARGET_FILE:arf_tests>
+         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+         )
+
+add_custom_target(run_tests
         COMMAND $<TARGET_FILE:arf_tests>)
 

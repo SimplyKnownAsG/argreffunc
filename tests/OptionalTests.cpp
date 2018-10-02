@@ -43,7 +43,7 @@ TEST_CASE("optional", "[optional]") {
     SECTION("optional:12 fails") {
         std::vector<std::string> argv = { "--second:99.12" };
 
-        REQUIRE_THROWS_AS(parser.parse(argv), arf::ArfException);
+        REQUIRE_THROWS_AS(parser.parse(argv), arf::Exception);
         REQUIRE(float_val == 0.0f);
     }
     SECTION("multiple args") {
