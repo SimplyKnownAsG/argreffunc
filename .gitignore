@@ -12,6 +12,8 @@ __pycache__/
 
 # Generated files
 release/
+build/
+debug/
 cwap.py
 *_wrap*
 cwap/cwap.hpp

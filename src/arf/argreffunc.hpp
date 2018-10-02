@@ -162,7 +162,7 @@ namespace arf {
 
                         if (iterator.current().size() == name.size() + 2) {
                             iterator.next();
-                            stream = std::istringstream(iterator.current());
+                            stream.str(iterator.current());
                         } else if (iterator.current().size() > name.size() + 2) {
                             if (iterator.current()[name.size() + 2] != '=') {
                                 std::ostringstream err_msg;
@@ -170,7 +170,7 @@ namespace arf {
                                         << "`, but got:" << iterator.current() << "`.";
                                 throw ArfException(err_msg.str());
                             }
-                            stream = std::istringstream(iterator.current().substr(3 + name.size()));
+                            stream.str(iterator.current().substr(3 + name.size()));
                         } else {
                             std::ostringstream err_msg;
                             err_msg << "I don't understand how this happened.";
@@ -205,14 +205,12 @@ namespace arf {
 
                         if (iterator.current().size() == name.size() + 1) {
                             iterator.next();
-                            stream = std::istringstream(iterator.current());
+                            stream.str(iterator.current());
                         } else if (iterator.current().size() > name.size() + 1) {
                             if (iterator.current()[name.size() + 1] == '=') {
-                                stream =
-                                  std::istringstream(iterator.current().substr(2 + name.size()));
+                                stream.str(iterator.current().substr(2 + name.size()));
                             } else {
-                                stream =
-                                  std::istringstream(iterator.current().substr(1 + name.size()));
+                                stream.str(iterator.current().substr(1 + name.size()));
                             }
                         } else {
                             std::ostringstream err_msg;
