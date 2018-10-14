@@ -5,6 +5,10 @@
 
 namespace arf {
 
+    /**
+     * @brief Class for internal use which iterates over all the command line arguments supplied by
+     * a user.
+     */
     class ArgIterator {
     private:
         int _position;

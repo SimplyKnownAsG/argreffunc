@@ -8,7 +8,7 @@ namespace arf {
     }
 
     void Arg::parse(std::istringstream& stream) {
-        this->_parse(stream);
+        this->parse_hook(stream);
         if (stream.bad()) {
             std::ostringstream err_msg;
             err_msg << "Failed to parse `" << this->names[0] << "`, stream state is bad.";
