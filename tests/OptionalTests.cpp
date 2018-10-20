@@ -10,16 +10,16 @@ public:
 };
 
 TEST_CASE("optional", "[optional]") {
-    arf::Parser parser;
+    arf::Parser parser("prog");
     int int_val = 0;
     float float_val = 0.0f;
 
     SomeClass sc;
     std::function<void(double)> func = [&](double arg) -> void { sc.member_dubs = arg; };
     sc.member_dubs = 0.0;
-    parser.add("first", int_val);
-    parser.add("second", float_val);
-    parser.add("third", func);
+    parser.add("first", "f", int_val);
+    parser.add("second", "s", float_val);
+    parser.add("third", "t", func);
 
     SECTION("optional 12") {
         int argc = 3;
@@ -58,9 +58,9 @@ TEST_CASE("optional", "[optional]") {
 }
 
 TEST_CASE("multi-alias", "[optional]") {
-    arf::Parser parser;
+    arf::Parser parser("prog");
     std::string thing = "";
-    parser.add("thing1", thing).add_alias("thing2", "t");
+    parser.add("thing1", "1", thing).add_alias("thing2", "t");
     std::vector<std::string> argv;
 
     SECTION("first alias") {

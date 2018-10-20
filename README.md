@@ -68,6 +68,9 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/3rd-party/argreffunc/src
                  ${CMAKE_CURRENT_BINARY_DIR}/3rd-party/argreffunc/build)
 ~~~
 
+\example Example.cpp
+here's a thing.
+
 2. Use ``ExternalProject_Add```.
 
 Otherwise

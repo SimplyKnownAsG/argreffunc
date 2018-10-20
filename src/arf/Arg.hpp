@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <ostream>
+
 namespace arf {
     /**
      * @brief An abstract command line argument.
@@ -20,6 +22,14 @@ namespace arf {
         std::vector<std::string> names;
 
         /**
+         * @brief help message
+         *
+         * WHen printed out, this will be autoformatted to have 8 spaces at the start and be 80
+         * characters wide.
+         */
+        std::string const help;
+
+        /**
          * @brief Short (single character) aliases for the Argument
          *
          * These are the short (single character) aliases for the argument. Aliases are prefixed
@@ -27,7 +37,13 @@ namespace arf {
          */
         std::vector<std::string> aliases;
 
-        explicit Arg(std::string name);
+        /**
+         * @brief Create a new Arg with the given name and help
+         *
+         * @param name name of the argument
+         * @param help description of argument
+         */
+        Arg(std::string name, std::string help);
 
         /**
          * @brief Parses the Arg value, raises an Exception if the stream is not consumed.
@@ -44,8 +60,10 @@ namespace arf {
          * Add an alias (single character) to the Arg, this can be used as a short alias.
          *
          * @param alias
+         *
+         * @return the Arg itself for chaining
          */
-        void add_alias(std::string alias);
+        Arg& add_alias(std::string alias);
 
         /**
          * @brief Add multiple aliases to the Arg in a sginle call.
@@ -53,11 +71,14 @@ namespace arf {
          * @tparam Alias resolves to std::string
          * @param alias a std::string alias or name (single or multi-character)
          * @param aliases pass as a parameter pack
+         *
+         * @return the Arg itself for chaining
          */
         template<typename... Alias>
-        void add_alias(std::string alias, Alias... aliases) {
+        Arg& add_alias(std::string alias, Alias... aliases) {
             this->add_alias(alias);
             this->add_alias(aliases...);
+            return *this;
         };
 
         /**
@@ -69,5 +90,9 @@ namespace arf {
          * @param stream a stream for parsing
          */
         virtual void parse_hook(std::istream& stream) = 0;
+
+    private:
+        friend class Parser;
+        void print_help(std::ostream& stream) const;
     };
 }

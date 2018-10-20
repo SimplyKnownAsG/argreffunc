@@ -10,16 +10,16 @@ public:
 };
 
 TEST_CASE("positional", "[positional]") {
-    arf::Parser parser;
+    arf::Parser parser("prog");
     int int_val;
     float float_val = 0.0f;
 
     SomeClass sc;
     std::function<void(double)> func = [&](double arg) -> void { sc.member_dubs = arg; };
     sc.member_dubs = 0.0;
-    parser.add_positional("first", int_val);
-    parser.add_positional("second", float_val);
-    parser.add_positional("third", func);
+    parser.add_positional("first", "f", int_val);
+    parser.add_positional("second", "s", float_val);
+    parser.add_positional("third", "t", func);
 
     SECTION("success with argc argv") {
         int argc = 4;

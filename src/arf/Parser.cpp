@@ -1,7 +1,12 @@
 #include "arf/Parser.hpp"
 #include "arf/Exception.hpp"
 
+#include <iostream>
+
 namespace arf {
+
+    Parser::Parser(std::string program)
+      : program(program) {}
 
     void Parser::_parse(ArgIterator& iterator, std::vector<Arg*>::iterator& positional) {
         while (iterator.next()) {
@@ -130,5 +135,16 @@ namespace arf {
         ArgIterator iterator(args);
         std::vector<Arg*>::iterator positional = this->positional_args.begin();
         this->_parse(iterator, positional);
+    }
+
+    void Parser::print_help() {
+        this->print_help(std::cout);
+    }
+
+    void Parser::print_help(std::ostream& stream) {
+        stream << this->program << "\n";
+        for (auto& arg : this->args) {
+            arg->print_help(stream);
+        }
     }
 }

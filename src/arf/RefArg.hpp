@@ -20,10 +20,11 @@ namespace arf {
          * @brief Create a new RefArg with a name and variable reference.
          *
          * @param name name of the argument
+         * @param help help message
          * @param ref_variable variable reference
          */
-        RefArg(const std::string name, T& ref_variable)
-          : Arg(name)
+        RefArg(const std::string name, std::string help, T& ref_variable)
+          : Arg(name, help)
           , val(ref_variable){};
 
         /**

@@ -22,10 +22,11 @@ namespace arf {
          * @brief Create a new FuncArg with a name and a function.
          *
          * @param name name of the argument
+         * @param help help message
          * @param func function to be called with the argument value
          */
-        FuncArg(const std::string name, std::function<void(T)> func)
-          : Arg(name)
+        FuncArg(const std::string name, std::string help, std::function<void(T)> func)
+          : Arg(name, help)
           , func(func){};
 
         /**
