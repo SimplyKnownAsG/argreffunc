@@ -60,7 +60,7 @@ TEST_CASE("optional", "[optional]") {
 TEST_CASE("multi-alias", "[optional]") {
     arf::Parser parser("prog");
     std::string thing = "";
-    parser.add("thing1", "1", thing).add_alias("thing2", "t");
+    parser.add("thing1", "1", thing).add_alias("thing2").add_alias("t");
     std::vector<std::string> argv;
 
     SECTION("first alias") {

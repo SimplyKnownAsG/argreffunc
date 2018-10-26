@@ -25,8 +25,12 @@ namespace arf {
          * @param help help message
          * @param func function to be called with the argument value
          */
-        FuncArg(const std::string name, std::string help, std::function<void(T)> func)
-          : Arg(name, help)
+        FuncArg(const std::string name,
+                bool positional,
+                bool required,
+                std::string help,
+                std::function<void(T)> func)
+          : Arg(name, positional, required, help)
           , func(func){};
 
         /**
@@ -38,10 +42,8 @@ namespace arf {
          *
          * @param stream stream to be parsed.
          */
-        void parse_hook(std::istream& stream) override {
-            T value;
-            stream >> value;
-            this->func(value);
+        void parse_hook(ArgIterator& iterator) override {
+            this->func(iterator.get_value<T>(this->name));
         };
     };
 }

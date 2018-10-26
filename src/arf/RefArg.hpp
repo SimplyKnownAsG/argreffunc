@@ -23,20 +23,23 @@ namespace arf {
          * @param help help message
          * @param ref_variable variable reference
          */
-        RefArg(const std::string name, std::string help, T& ref_variable)
-          : Arg(name, help)
+        RefArg(const std::string name,
+               bool positional,
+               bool required,
+               std::string help,
+               T& ref_variable)
+          : Arg(name, positional, required, help)
           , val(ref_variable){};
 
         /**
          * @brief Default parse implementation
          *
-         * This is a pretty naive parse, just `>>` to the reference variable. Error handling exists
-         * elsewhere to ensure that the entire stream has been consumed.
+         * Cast the value to the correct type.
          *
          * @param stream stream to be parsed.
          */
-        void parse_hook(std::istream& stream) override {
-            stream >> this->val;
-        }
+        void parse_hook(ArgIterator& iterator) override {
+            this->val = iterator.get_value<T>(this->name);
+        };
     };
 }

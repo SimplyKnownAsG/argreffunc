@@ -1,68 +1,30 @@
 #include "arf/Arg.hpp"
+#include "arf/ArgIterator.hpp"
 #include "arf/Exception.hpp"
 
 namespace arf {
 
-    Arg::Arg(std::string name, std::string help)
-      : help(help) {
-        this->names.push_back(name);
-    }
+    Arg::Arg(std::string name, bool positional, bool required, std::string help)
+      : name(name, positional)
+      , required(required)
+      , help(help) {}
 
-    void Arg::parse(std::istringstream& stream) {
-        this->parse_hook(stream);
-        if (stream.bad()) {
-            std::ostringstream err_msg;
-            err_msg << "Failed to parse `" << this->names[0] << "`, stream state is bad.";
-            throw Exception(err_msg.str());
+    bool Arg::parse(ArgIterator& iterator) {
+        if (this->name.matches(iterator)) {
+            this->parse_hook(iterator);
+            return true;
         }
-        if (!stream.eof()) {
-            std::ostringstream err_msg;
-            err_msg << "Failed to parse `" << this->names[0]
-                    << "`, not at end of stream: " << stream.str();
-            throw Exception(err_msg.str());
-        }
-    }
 
-    Arg& Arg::add_alias(std::string alias) {
-        if (alias.size() == 1) {
-            this->aliases.push_back(alias);
-        } else {
-            this->names.push_back(alias);
-        }
-        return *this;
+        return false;
     }
 
     void Arg::print_help(std::ostream& stream) const {
-        auto write_names = [&stream](std::string prefix, std::vector<std::string> names) -> void {
-            // start with new line, this prevents a blank line after a program
-            // without any arguments. it also removes need for extra logic to
-            // prevent new line between this and the help description.
-            if (names.size() > 0) {
-                stream << "\n";
-            }
-            for (auto n = 0; n < names.size(); ++n) {
-                auto name = names[n];
-
-                if (n == 0) {
-                    stream << "    ";
-                } else {
-                    stream << ", ";
-                }
-
-                stream << prefix << name;
-
-                if (n == 0) {
-                    stream << " <" << name << ">";
-                }
-            }
-        };
-
-        write_names("--", this->names);
-        write_names("-", this->aliases);
+        this->name.print_help(stream);
 
         std::istringstream line_finder(help);
         std::string line;
         int linelength = 80; // force newline
+
         while (std::getline(line_finder, line)) {
             std::istringstream word_finder(line);
             std::string word;
@@ -92,4 +54,10 @@ namespace arf {
 
         stream << "\n";
     }
+
+    Arg& Arg::add_alias(std::string alias) {
+        this->name.add_alias(alias);
+        return *this;
+    }
+
 }
