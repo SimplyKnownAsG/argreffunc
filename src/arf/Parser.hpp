@@ -4,6 +4,7 @@
 #include "arf/ArgIterator.hpp"
 #include "arf/FuncArg.hpp"
 #include "arf/RefArg.hpp"
+#include "arf/SwitchArg.hpp"
 
 #include <functional>
 #include <vector>
@@ -21,15 +22,7 @@ namespace arf {
 
         std::vector<Arg*> args;
 
-        std::vector<Arg*> positional_args;
-
-        void _parse(ArgIterator& iterator, std::vector<Arg*>::iterator& positional);
-
-        void _parse_long(ArgIterator& iterator);
-
-        void _parse_short(ArgIterator& iterator);
-
-        void _parse_positional(ArgIterator& iterator, std::vector<Arg*>::iterator& positional);
+        void _parse(ArgIterator& iterator);
 
     public:
         /**
@@ -52,8 +45,8 @@ namespace arf {
          */
         template<typename T>
         void add_positional(std::string name, std::string help, T& refval) {
-            auto arg = new RefArg<T>(name, help, refval);
-            this->positional_args.push_back(arg);
+            auto arg = new RefArg<T>(name, true, true, help, refval);
+            this->args.push_back(arg);
         };
 
         /**
@@ -69,8 +62,8 @@ namespace arf {
          */
         template<typename T>
         void add_positional(std::string name, std::string help, std::function<void(T)> func) {
-            auto arg = new FuncArg<T>(name, help, func);
-            this->positional_args.push_back(arg);
+            auto arg = new FuncArg<T>(name, true, true, help, func);
+            this->args.push_back(arg);
         };
 
         /**
@@ -89,7 +82,7 @@ namespace arf {
          */
         template<typename T>
         Arg& add(std::string name, std::string help, T& refval) {
-            auto arg = new RefArg<T>(name, help, refval);
+            auto arg = new RefArg<T>(name, false, false, help, refval);
             this->args.push_back(arg);
             return *arg;
         };
@@ -110,7 +103,25 @@ namespace arf {
          */
         template<typename T>
         Arg& add(std::string name, std::string help, std::function<void(T)> func) {
-            auto arg = new FuncArg<T>(name, help, func);
+            auto arg = new FuncArg<T>(name, false, false, help, func);
+            this->args.push_back(arg);
+            return *arg;
+        };
+
+        /**
+         * @brief Add a named argument with a function to interpret the value.
+         *
+         * A SwitchArg when found invokes the specified function.
+         *
+         * @param name name of the argument
+         * @param help help message
+         * @param func user specified function for interpreting the command line argument
+         *
+         * @return a reference to the Arg that was created. This is done so that you could add
+         *         aliases to the argument.
+         */
+        Arg& add(std::string name, std::string help, std::function<void()> func) {
+            auto arg = new SwitchArg(name, help, func);
             this->args.push_back(arg);
             return *arg;
         };

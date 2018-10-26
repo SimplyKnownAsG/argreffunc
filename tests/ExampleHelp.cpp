@@ -8,6 +8,17 @@
 TEST_CASE("example-help", "[example]") {
     arf::Parser parser("the-program-name");
 
+    SECTION("adding a help option") {
+        bool show_help = false;
+        parser.add("help", "show help", [&show_help](void) { show_help = true; })
+          .add_alias("h")
+          .add_alias("?");
+        std::vector<std::string> params = { "--help" };
+        parser.parse(params);
+        REQUIRE(show_help == true);
+    }
+
+    /// this is a comment, that I would like broken out
     SECTION("really long documentation") {
         std::string greeting = "Hello";
         std::string name = "World";
@@ -76,7 +87,8 @@ TEST_CASE("example-help", "[example]") {
         std::string spaced = "...";
         parser.add(
           "spaced",
-          "first its-not-that-i-don't-like-spaces,it's-just-that-i-think-there-is-another-way last",
+          "first its-not-that-i-don't-like-spaces,it's-just-that-i-think-there-is-another-way "
+          "last",
           spaced);
         std::string expected = R"(the-program-name
 
@@ -99,7 +111,7 @@ TEST_CASE("example-help", "[example]") {
         std::string expected = R"(the-program-name
 
     --name1 <name1>, --name2
-    -n <n>, -1, -2
+    -n <name1>, -1, -2
         description of name1
 )";
         std::stringstream stream;

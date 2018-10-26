@@ -42,20 +42,11 @@ TEST_CASE("positional", "[positional]") {
     }
     SECTION("too few") {
         std::vector<std::string> args = { "7" };
-
         REQUIRE_THROWS_AS(parser.parse(args), arf::Exception);
-
-        REQUIRE(int_val == 7);
-        REQUIRE(float_val == 0.0f);
-        REQUIRE(sc.member_dubs == 0.0);
     }
     SECTION("too many") {
         std::vector<std::string> args = { "9", "12.12", "42e42", "barf" };
 
         REQUIRE_THROWS_AS(parser.parse(args), arf::Exception);
-
-        REQUIRE(int_val == 9);
-        REQUIRE(float_val == 12.12f);
-        REQUIRE(sc.member_dubs == 42e42);
     }
 }
