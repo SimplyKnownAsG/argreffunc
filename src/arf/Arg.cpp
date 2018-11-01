@@ -5,17 +5,13 @@
 namespace arf {
 
     Arg::Arg(std::string name, bool positional, bool required, std::string help)
-      : name(name, positional)
+      : name(name)
+      , is_positional(positional)
       , required(required)
       , help(help) {}
 
-    bool Arg::parse(ArgIterator& iterator) {
-        if (this->name.matches(iterator)) {
-            this->parse_hook(iterator);
-            return true;
-        }
-
-        return false;
+    void Arg::parse(ArgIterator& iterator) {
+        this->parse_hook(iterator);
     }
 
     void Arg::print_help(std::ostream& stream) const {

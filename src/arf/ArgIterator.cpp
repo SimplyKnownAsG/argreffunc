@@ -41,4 +41,29 @@ namespace arf {
     ArgType const& ArgIterator::type() const {
         return this->_type;
     }
+
+    std::string ArgIterator::get_name() {
+        std::string name;
+        size_t begin, len;
+
+        switch (this->_type) {
+        case ArgType::Long:
+            begin = 2;
+            len = this->current().find("=") - 2;
+            break;
+        case ArgType::Short:
+            begin = 1;
+            len = 1;
+            break;
+        default:
+            throw Exception("Cannot get name of positional argument");
+        }
+
+        this->value_start = begin + len;
+        if (this->value_start < this->current().size() &&
+            this->current()[this->value_start] == '=') {
+            this->value_start += 1;
+        }
+        return this->current().substr(begin, len);
+    }
 }

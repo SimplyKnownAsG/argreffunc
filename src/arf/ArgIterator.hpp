@@ -40,6 +40,8 @@ namespace arf {
 
         ArgType const& type() const;
 
+        std::string get_name();
+
         template<typename T>
         T get_value(Name& name) {
             T val;

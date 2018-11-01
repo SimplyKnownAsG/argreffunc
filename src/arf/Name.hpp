@@ -15,8 +15,6 @@ namespace arf {
      */
     class Name {
     public:
-        bool const is_positional;
-
         /**
          * @brief The first supplied name
          */
@@ -41,16 +39,15 @@ namespace arf {
          * @brief Create a new Arg with the given name and help
          *
          * @param name name of the argument
-         * @param is_positional flag indicating whether the associated Arg is positional or optional
          */
-        Name(std::string name, bool is_positional);
+        Name(std::string name);
 
         /**
          * @brief Returns true if the arg matches, otherwise false
          *
          * @param iterator current ArgIterator
          */
-        bool matches(ArgIterator& iterator);
+        /* bool matches(ArgIterator& iterator); */
 
         /**
          * @brief Add an alias to the Arg.

@@ -25,20 +25,22 @@ namespace arf {
         bool const required;
 
         /**
+         * @brief if true, the Arg is positional, if false it is named.
+         */
+        bool const is_positional;
+
+        /**
+         * @brief stateful variable indicating the argument has been parsed
+         */
+        bool parsed = false;
+
+        /**
          * @brief help message
          *
          * When printed out, this will be auto-formatted to have 8 spaces at the start and be 80
          * characters wide.
          */
         std::string const help;
-
-        /**
-         * @brief Short (single character) aliases for the Argument
-         *
-         * These are the short (single character) aliases for the argument. Aliases are prefixed
-         * with a single leading `-`, and may be stacked until an argument requires a value.
-         */
-        std::vector<std::string> aliases;
 
         /**
          * @brief Create a new Arg with the given name and help
@@ -57,7 +59,7 @@ namespace arf {
          *
          * @param stream stream to be parsed
          */
-        bool parse(ArgIterator& iterator);
+        void parse(ArgIterator& iterator);
 
         /**
          * @brief Parse the Arg
