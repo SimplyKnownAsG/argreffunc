@@ -86,5 +86,7 @@ namespace arf {
          * @return the Arg itself for chaining
          */
         Arg& add_alias(std::string alias);
+
+        virtual ~Arg() = default;
     };
 }

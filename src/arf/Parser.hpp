@@ -7,6 +7,7 @@
 #include "arf/SwitchArg.hpp"
 
 #include <functional>
+#include <memory>
 #include <vector>
 
 namespace arf {
@@ -20,7 +21,7 @@ namespace arf {
     private:
         std::string const program;
 
-        std::vector<Arg*> args;
+        std::vector<std::unique_ptr<Arg>> args;
 
         void _parse(ArgIterator& iterator);
 
@@ -46,7 +47,7 @@ namespace arf {
         template<typename T>
         void add_positional(std::string name, std::string help, T& refval) {
             auto arg = new RefArg<T>(name, true, true, help, refval);
-            this->args.push_back(arg);
+            this->args.emplace_back(arg);
         };
 
         /**
@@ -63,7 +64,7 @@ namespace arf {
         template<typename T>
         void add_positional(std::string name, std::string help, std::function<void(T)> func) {
             auto arg = new FuncArg<T>(name, true, true, help, func);
-            this->args.push_back(arg);
+            this->args.emplace_back(arg);
         };
 
         /**
@@ -83,7 +84,7 @@ namespace arf {
         template<typename T>
         Arg& add(std::string name, std::string help, T& refval) {
             auto arg = new RefArg<T>(name, false, false, help, refval);
-            this->args.push_back(arg);
+            this->args.emplace_back(arg);
             return *arg;
         };
 
@@ -104,7 +105,7 @@ namespace arf {
         template<typename T>
         Arg& add(std::string name, std::string help, std::function<void(T)> func) {
             auto arg = new FuncArg<T>(name, false, false, help, func);
-            this->args.push_back(arg);
+            this->args.emplace_back(arg);
             return *arg;
         };
 
@@ -122,7 +123,7 @@ namespace arf {
          */
         Arg& add(std::string name, std::string help, std::function<void()> func) {
             auto arg = new SwitchArg(name, help, func);
-            this->args.push_back(arg);
+            this->args.emplace_back(arg);
             return *arg;
         };
 

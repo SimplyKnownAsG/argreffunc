@@ -33,7 +33,7 @@ namespace arf {
         while (iterator.next()) {
             bool matched = false;
 
-            for (auto arg : this->args) {
+            for (auto& arg : this->args) {
                 matched = arg->parse(iterator);
 
                 if (matched) {
@@ -46,8 +46,8 @@ namespace arf {
             }
         }
 
-        auto num_positional =
-          std::count_if(this->args.begin(), this->args.end(), [](Arg const* a) -> bool {
+        auto num_positional = std::count_if(
+          this->args.begin(), this->args.end(), [](std::unique_ptr<Arg> const& a) -> bool {
               return a->required && a->name.is_positional;
           });
 
