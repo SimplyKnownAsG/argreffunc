@@ -82,3 +82,47 @@ TEST_CASE("multi-alias", "[optional]") {
     parser.parse(argv);
     REQUIRE(thing == "bacon");
 }
+
+TEST_CASE("stacking short options", "[optional]") {
+    arf::Parser parser("prog");
+    std::string thing = "";
+    int verbosity = 0;
+    parser.add("thing1", "1", thing).add_alias("t");
+    parser.add("verbose", "1", [&verbosity]() { verbosity += 1; }).add_alias("v");
+
+    SECTION("vtvalue") {
+        std::vector<std::string> argv = { "-vtvalue" };
+        parser.parse(argv);
+
+        REQUIRE(verbosity == 1);
+        REQUIRE(thing == "value");
+    }
+    SECTION("tv") {
+        std::vector<std::string> argv = { "-tv" };
+        parser.parse(argv);
+
+        REQUIRE(verbosity == 0);
+        REQUIRE(thing == "v");
+    }
+    SECTION("vv") {
+        std::vector<std::string> argv = { "-vv" };
+        parser.parse(argv);
+
+        REQUIRE(verbosity == 2);
+        REQUIRE(thing == "");
+    }
+    SECTION("vvt") {
+        std::vector<std::string> argv = { "-vvtalue" };
+        parser.parse(argv);
+
+        REQUIRE(verbosity == 2);
+        REQUIRE(thing == "alue");
+    }
+    SECTION("vt=val v") {
+        std::vector<std::string> argv = { "-vtvalue", "-v" };
+        parser.parse(argv);
+
+        REQUIRE(verbosity == 2);
+        REQUIRE(thing == "value");
+    }
+}

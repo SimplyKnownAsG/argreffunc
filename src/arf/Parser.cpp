@@ -51,7 +51,8 @@ namespace arf {
                 auto name = iterator.get_name();
                 if (!named.count(name)) {
                     std::ostringstream err_msg;
-                    err_msg << "Urecognized argument `" << iterator.current() << "`."
+                    err_msg << "Urecognized argument `" << iterator.current() << "` with name `"
+                            << name << "`."
                             << " Note that --named arguments must use an = as a value separator.";
                     throw Exception(err_msg.str());
                 }
@@ -91,11 +92,21 @@ namespace arf {
             if (arg->is_positional) {
                 positional.push_back(arg.get());
             } else {
-                for (string const& name : arg->name.names) {
-                    named[name] = arg.get();
-                }
-                for (string const& name : arg->name.aliases) {
-                    named[name] = arg.get();
+                vector<vector<string>> namelists = { arg->name.names, arg->name.aliases };
+                for (auto& namelist : namelists) {
+                    for (string const& name : namelist) {
+                        if (named.count(name) != 0) {
+                            std::ostringstream err_msg;
+                            err_msg << "argument definition error: name collision with `" << name
+                                    << "`\n";
+                            err_msg << "first defined:";
+                            named.at(name)->print_help(err_msg);
+                            err_msg << "second defined:";
+                            arg->print_help(err_msg);
+                            throw Exception(err_msg.str());
+                        }
+                        named[name] = arg.get();
+                    }
                 }
             }
         }

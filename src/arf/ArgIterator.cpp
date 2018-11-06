@@ -3,17 +3,28 @@
 namespace arf {
 
     ArgIterator::ArgIterator(std::vector<std::string> arguments)
-      : arguments(arguments) {
-        this->_position = -1;
-    }
+      : _value_start(0)
+      , _position(-1)
+      , _type(ArgType::None)
+      , arguments(arguments) {}
 
     ArgIterator::ArgIterator(int argc, char* argv[])
-      : arguments(argv + 1, argv + argc) {
-        this->_position = -1;
-    }
+      : _value_start(0)
+      , _position(-1)
+      , _type(ArgType::None)
+      , arguments(argv + 1, argv + argc) {}
 
     bool ArgIterator::next() {
-        this->value_start = 0;
+        if (this->_value_start != 0 && this->_value_start < this->current().size()) {
+            // this is checking for short alias usage. it does not progress if a short alias has
+            // been used and the end of the argument hasn't been reached. For example
+            //     -vvvf=filename
+            //      ^               parse the v
+            //       ^^^            continue parsing current string
+            //                   ^  move on to next argument
+            return true;
+        }
+        this->_value_start = 0;
         bool has_next = ++_position < this->arguments.size();
 
         if (!has_next) {
@@ -52,17 +63,20 @@ namespace arf {
             len = this->current().find("=") - 2;
             break;
         case ArgType::Short:
-            begin = 1;
+            begin = this->_value_start; // allows us to march
+            if (begin == 0) {
+                begin += 1;
+            }
             len = 1;
             break;
         default:
             throw Exception("Cannot get name of positional argument");
         }
 
-        this->value_start = begin + len;
-        if (this->value_start < this->current().size() &&
-            this->current()[this->value_start] == '=') {
-            this->value_start += 1;
+        this->_value_start = begin + len;
+        if (this->_value_start < this->current().size() &&
+            this->current()[this->_value_start] == '=') {
+            this->_value_start += 1;
         }
         return this->current().substr(begin, len);
     }

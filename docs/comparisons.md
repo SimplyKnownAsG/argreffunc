@@ -4,7 +4,7 @@ There are already lots of parsers out there. So, what's so great about `argreffu
 It is mainly just different. The sections below take examples from other projects
 and convert them to use `argreffunc`.
 
-## [boost::program_options](https://www.boost.org/doc/libs/1_68_0/doc/html/program_options/tutorial.html)
+## [boost::program_options](https://www.boost.org/doc/libs/1_68_0/doc/html/program_options.html)
 Might as well start with boost.
 
 <table>
@@ -84,10 +84,15 @@ parsing the arguments.
 There is also a lot more that can be done with `boost::program_options`. In fact, it looks like
 there is a mechanism to use pointers with `po::value<T>(T*)`.
 
-## TCLAP
+## [TCLAP](http://tclap.sourceforge.net/)
 
 <table>
 <tr><th>`TCLAP`</th><th>`argreffunc`</th></tr>
+<tr><td>Written in ANSI C++</td>
+    <td>Written in c++11 (due to
+        [std::function](https://en.cppreference.com/w/cpp/utility/functional/function) and some
+        other things, but mainly that!)</td>
+</tr>
 <tr><td>
 ~~~~{.cpp}
 #include <string>
@@ -140,3 +145,15 @@ int main(int argc, char** argv)
 \include CompareToTCLAP.cpp
 </td></tr>
 </table>
+
+## [CLI11](https://cliutils.gitlab.io/CLI11Tutorial/)
+
+Honestly, CLI11 has essentially the same mechanism of building arguments, and would work just fine.
+Had I seen CLI11 at the start, I wouldn't have bothered writing this. Darnit. CLI11 has more
+features than `argreffunc`, and more than `argreffunc` is ever intended to have.
+
+I think there may be a performance benefit to `argreffunc`. At a minimum it looks like in order to
+have a sub-parser that it be pre-constructed with CLI11. `argreffunc` just passes the active
+ArgIterator to a new parser that can be populated after the "parent" parser determined the subparser
+was necessary.
+

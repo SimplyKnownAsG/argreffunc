@@ -17,15 +17,13 @@ namespace arf {
      */
     class ArgIterator {
     private:
-        int _position;
+        size_t _value_start;
+
+        size_t _position;
 
         ArgType _type;
 
         std::vector<std::string> arguments;
-
-        friend class Name;
-
-        int value_start;
 
     public:
         explicit ArgIterator(std::vector<std::string> arguments);
@@ -45,13 +43,15 @@ namespace arf {
         template<typename T>
         T get_value(Name& name) {
             T val;
-            if (this->current().size() <= this->value_start) {
+            if (this->current().size() <= this->_value_start) {
                 this->next();
             }
 
             std::istringstream stream(this->current());
-            stream.seekg(this->value_start, std::ios::cur);
+            stream.seekg(this->_value_start, std::ios::cur);
             stream >> val;
+
+            this->_value_start = this->current().size() + 1;
 
             if (stream.bad()) {
                 std::ostringstream err_msg;
