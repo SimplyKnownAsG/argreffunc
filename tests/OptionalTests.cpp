@@ -4,13 +4,15 @@
 
 #include <iostream>
 
+using namespace arf;
+
 class SomeClass {
 public:
     double member_dubs;
 };
 
 TEST_CASE("optional", "[optional]") {
-    arf::Parser parser("prog");
+    Parser parser("prog");
     int int_val = 0;
     float float_val = 0.0f;
 
@@ -44,7 +46,7 @@ TEST_CASE("optional", "[optional]") {
     SECTION("optional:12 fails") {
         std::vector<std::string> argv = { "--second:99.12" };
 
-        REQUIRE_THROWS_AS(parser.parse(argv), arf::Exception);
+        REQUIRE_THROWS_AS(parser.parse(argv), Exception);
         REQUIRE(float_val == 0.0f);
     }
     SECTION("multiple args") {
@@ -59,7 +61,7 @@ TEST_CASE("optional", "[optional]") {
 }
 
 TEST_CASE("multi-alias", "[optional]") {
-    arf::Parser parser("prog");
+    Parser parser("prog");
     std::string thing = "";
     parser.add("thing1", "1", thing).add_alias("thing2").add_alias("t");
     std::vector<std::string> argv;
@@ -68,7 +70,7 @@ TEST_CASE("multi-alias", "[optional]") {
         argv.push_back("--thing1=bacon");
     }
     SECTION("second alias") {
-        argv.push_back("--thing1=bacon");
+        argv.push_back("--thing2=bacon");
     }
     SECTION("short alias no equal") {
         argv.push_back("-tbacon");
@@ -85,7 +87,7 @@ TEST_CASE("multi-alias", "[optional]") {
 }
 
 TEST_CASE("stacking short options", "[optional]") {
-    arf::Parser parser("prog");
+    Parser parser("prog");
     std::string thing = "";
     int verbosity = 0;
     parser.add("thing1", "1", thing).add_alias("t");
@@ -127,3 +129,31 @@ TEST_CASE("stacking short options", "[optional]") {
         REQUIRE(thing == "value");
     }
 }
+
+TEST_CASE("optional multile-values", "[optional][multi]") {
+    Parser parser("prog");
+
+    SECTION("multiple values") {
+        std::vector<std::string> values;
+        std::vector<std::string> args = { "--values", "This", "is", "a", "sentence." };
+        std::function<void(ArgIterator&)> func = [&](ArgIterator& iterator) {
+            iterator.get_values("values", values);
+        };
+        parser.add("values", "all values", func);
+        parser.parse(args);
+        REQUIRE(values.size() == args.size() - 1);
+        REQUIRE(values.at(2) == "a");
+    }
+    SECTION("multiple values=") {
+        std::vector<std::string> values;
+        std::vector<std::string> args = { "--values=This", "is", "a", "sentence." };
+        std::function<void(ArgIterator&)> func = [&](ArgIterator& iterator) {
+            iterator.get_values("values", values);
+        };
+        parser.add("values", "all values", func);
+        parser.parse(args);
+        REQUIRE(values.size() == args.size());
+        REQUIRE(values.at(2) == "a");
+    }
+}
+

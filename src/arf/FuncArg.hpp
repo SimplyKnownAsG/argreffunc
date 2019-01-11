@@ -43,7 +43,10 @@ namespace arf {
          * @param stream stream to be parsed.
          */
         void parse_hook(ArgIterator& iterator) override {
-            this->func(iterator.get_value<T>(this->name));
+            this->func(iterator.get_value<T>(this->name.name));
         };
     };
+
+    template<>
+    void FuncArg<ArgIterator&>::parse_hook(ArgIterator& iterator);
 }

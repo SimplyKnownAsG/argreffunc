@@ -41,14 +41,14 @@ namespace arf {
         std::string get_name();
 
         template<typename T>
-        T get_value(Name& name) {
+        T get_value(std::string const& name) {
             T val;
             if (this->current().size() <= this->_value_start) {
                 this->next();
             }
 
             if (this->_type == ArgType::None) {
-                throw Exception("Failed to parse `" + name.name + "`, missing value");
+                throw Exception("Failed to parse `" + name + "`, missing value");
             }
 
             std::istringstream stream(this->current());
@@ -59,19 +59,27 @@ namespace arf {
 
             if (stream.bad()) {
                 std::ostringstream err_msg;
-                err_msg << "Failed to parse `" << name.name << "`, stream state is bad.";
+                err_msg << "Failed to parse `" << name << "`, stream state is bad.";
                 throw Exception(err_msg.str());
             }
 
             if (!stream.eof()) {
                 std::ostringstream err_msg;
-                err_msg << "Failed to parse `" << name.name
+                err_msg << "Failed to parse `" << name
                         << "`, not at end of stream, remaining value: `" << stream.str()
                         << "`. Gathered value: `" << val << "`.";
                 throw Exception(err_msg.str());
             }
 
             return val;
+        };
+
+        template<typename T>
+        void get_values(std::string const& name, std::vector<T>& values) {
+            values.push_back(this->get_value<T>(name));
+            while (this->next() && this->type() == ArgType::Positional) {
+                values.push_back(this->get_value<std::string>("values"));
+            }
         };
     };
 }

@@ -40,7 +40,7 @@ namespace arf {
          * @param stream stream to be parsed.
          */
         void parse_hook(ArgIterator& iterator) override {
-            this->val = iterator.get_value<T>(this->name);
+            this->val = iterator.get_value<T>(this->name.name);
         };
     };
 }

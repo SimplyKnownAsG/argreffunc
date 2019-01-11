@@ -4,13 +4,15 @@
 
 #include <iostream>
 
+using namespace arf;
+
 class SomeClass {
 public:
     double member_dubs;
 };
 
 TEST_CASE("positional", "[positional]") {
-    arf::Parser parser("prog");
+    Parser parser("prog");
     int int_val;
     float float_val = 0.0f;
 
@@ -42,11 +44,27 @@ TEST_CASE("positional", "[positional]") {
     }
     SECTION("too few") {
         std::vector<std::string> args = { "7" };
-        REQUIRE_THROWS_AS(parser.parse(args), arf::Exception);
+        REQUIRE_THROWS_AS(parser.parse(args), Exception);
     }
     SECTION("too many") {
         std::vector<std::string> args = { "9", "12.12", "42e42", "barf" };
 
-        REQUIRE_THROWS_AS(parser.parse(args), arf::Exception);
+        REQUIRE_THROWS_AS(parser.parse(args), Exception);
+    }
+}
+
+TEST_CASE("positional multile-values", "[positional][multi]") {
+    Parser parser("prog");
+
+    SECTION("multiple values") {
+        std::vector<std::string> values;
+        std::vector<std::string> args = { "This", "is", "a", "sentence." };
+        std::function<void(ArgIterator&)> func = [&](ArgIterator& iterator) {
+            iterator.get_values("values", values);
+        };
+        parser.add_positional("values", "all values", func);
+        parser.parse(args);
+        REQUIRE(values.size() == args.size());
+        REQUIRE(values.at(2) == "a");
     }
 }
