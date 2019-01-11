@@ -52,4 +52,16 @@ TEST_CASE("bad arguments", "[errorhandling]") {
         argv.push_back("--name1");
         REQUIRE_THROWS_WITH(parser.parse(argv), Contains("missing value"));
     }
+    SECTION("bad type RefArg") {
+        int val;
+        parser.add_positional("name1", "desc 1", val);
+        argv.push_back("5b2");
+        REQUIRE_THROWS_WITH(parser.parse(argv), Contains("not at end of stream"));
+    }
+    SECTION("bad type FuncArg") {
+        std::function<void(int)> func = [](int v) { v++; };
+        parser.add_positional("name1", "desc 1", func);
+        argv.push_back("5b3");
+        REQUIRE_THROWS_WITH(parser.parse(argv), Contains("not at end of stream"));
+    }
 }

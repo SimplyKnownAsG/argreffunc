@@ -71,7 +71,6 @@ namespace arf {
                 throw Exception(err_msg.str());
             }
 
-            /* this->next(); */
             return val;
         };
     };
