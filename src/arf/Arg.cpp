@@ -1,6 +1,7 @@
 #include "arf/Arg.hpp"
 #include "arf/ArgIterator.hpp"
 #include "arf/Exception.hpp"
+#include "arf/SwitchArg.hpp"
 
 namespace arf {
 
@@ -15,7 +16,10 @@ namespace arf {
     }
 
     void Arg::print_help(std::ostream& stream) const {
-        this->name.print_help(stream);
+        this->name.print_help(stream,
+                              this->is_positional,
+                              this->required,
+                              dynamic_cast<const SwitchArg*>(this) != nullptr);
 
         std::istringstream line_finder(help);
         std::string line;
@@ -55,5 +59,4 @@ namespace arf {
         this->name.add_alias(alias);
         return *this;
     }
-
 }

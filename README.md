@@ -64,8 +64,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/argreffunc)
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
-add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/3rd-party/argreffunc/src
-                 ${CMAKE_CURRENT_BINARY_DIR}/3rd-party/argreffunc/build)
+add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/3rd-party/argreffunc/src)
 ~~~
 
 \example Example.cpp

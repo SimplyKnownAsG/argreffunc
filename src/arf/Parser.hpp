@@ -43,10 +43,14 @@ namespace arf {
          * @param name name of the argument
          * @param help help message
          * @param refval reference (`&`) of the value to assign
+         * @param is_required indicates the argument is required
          */
         template<typename T>
-        void add_positional(std::string name, std::string help, T& refval) {
-            auto arg = new RefArg<T>(name, true, true, help, refval);
+        void add_positional(std::string name,
+                            std::string help,
+                            T& refval,
+                            bool is_required = true) {
+            auto arg = new RefArg<T>(name, true, is_required, help, refval);
             this->args.emplace_back(arg);
         };
 
@@ -60,10 +64,14 @@ namespace arf {
          * @param name name of the argument
          * @param help help message
          * @param func user specified function for interpreting the command line argument
+         * @param is_required indicates the argument is required
          */
         template<typename T>
-        void add_positional(std::string name, std::string help, std::function<void(T)> func) {
-            auto arg = new FuncArg<T>(name, true, true, help, func);
+        void add_positional(std::string name,
+                            std::string help,
+                            std::function<void(T)> func,
+                            bool is_required = true) {
+            auto arg = new FuncArg<T>(name, true, is_required, help, func);
             this->args.emplace_back(arg);
         };
 

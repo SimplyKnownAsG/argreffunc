@@ -16,9 +16,11 @@ namespace arf {
         return *this;
     }
 
-    void Name::print_help(std::ostream& stream) const {
-        auto write_names = [&stream, this](std::string prefix,
-                                           std::vector<std::string> names) -> void {
+    void Name::print_help(std::ostream& stream,
+                          bool is_positional,
+                          bool is_required,
+                          bool is_switch) const {
+        auto write_names = [&](std::string prefix, std::vector<std::string> names) -> void {
             // start with new line, this prevents a blank line after a program
             // without any arguments. it also removes need for extra logic to
             // prevent new line between this and the help description.
@@ -35,10 +37,17 @@ namespace arf {
                     stream << ", ";
                 }
 
-                stream << prefix << n;
-
-                if (ni == 0) {
-                    stream << " <" << this->name << ">";
+                if (is_positional) {
+                    if (is_required) {
+                        stream << "<" << n << ">";
+                    } else {
+                        stream << "[" << n << "]";
+                    }
+                } else {
+                    stream << prefix << n;
+                    if (!is_switch) {
+                        stream << " <" << this->name << ">";
+                    }
                 }
             }
         };

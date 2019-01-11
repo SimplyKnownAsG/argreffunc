@@ -76,7 +76,9 @@ namespace arf {
             return *this;
         };
 
-        void print_help(std::ostream& stream) const;
+        void print_help(std::ostream& stream,
+                        bool is_positional,
+                        bool is_required,
+                        bool is_switch) const;
     };
-
 }
