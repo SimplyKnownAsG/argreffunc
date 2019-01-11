@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+using namespace Catch;
+
 TEST_CASE("name collisions", "[errorhandling][!mayfail]") {
     arf::Parser parser("prog");
     std::vector<std::string> argv;
@@ -33,14 +35,21 @@ TEST_CASE("name collisions", "[errorhandling][!mayfail]") {
     }
 }
 
-TEST_CASE("bad arguments", "[errorhandling][!mayfail]") {
+TEST_CASE("bad arguments", "[errorhandling]") {
     arf::Parser parser("prog");
     std::vector<std::string> argv;
 
-    SECTION("missing value") {
+    SECTION("missing value RefArg") {
         std::string name1;
         parser.add("name1", "desc 1", name1);
         argv.push_back("--name1");
-        REQUIRE_THROWS_WITH(parser.parse(argv), "missing value");
+        REQUIRE_THROWS_WITH(parser.parse(argv), Contains("missing value"));
+    }
+    SECTION("missing value FuncArg") {
+        bool called;
+        parser.add<std::string>(
+                "name1", "desc 1", [&](std::string nope) -> void { called = true; });
+        argv.push_back("--name1");
+        REQUIRE_THROWS_WITH(parser.parse(argv), Contains("missing value"));
     }
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "arf/Arg.hpp"
+#include <stdexcept>
 
 namespace arf {
     /**

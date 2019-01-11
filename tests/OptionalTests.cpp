@@ -15,6 +15,7 @@ TEST_CASE("optional", "[optional]") {
     float float_val = 0.0f;
 
     SomeClass sc;
+    /* std::function<void(double)> func = [&](double arg) -> void { sc.member_dubs = arg; }; */
     std::function<void(double)> func = [&](double arg) -> void { sc.member_dubs = arg; };
     sc.member_dubs = 0.0;
     parser.add("first", "f", int_val);

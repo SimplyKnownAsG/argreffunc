@@ -47,6 +47,10 @@ namespace arf {
                 this->next();
             }
 
+            if (this->_type == ArgType::None) {
+                throw Exception("Failed to parse `" + name.name + "`, missing value");
+            }
+
             std::istringstream stream(this->current());
             stream.seekg(this->_value_start, std::ios::cur);
             stream >> val;
@@ -55,13 +59,13 @@ namespace arf {
 
             if (stream.bad()) {
                 std::ostringstream err_msg;
-                err_msg << "Failed to parse `" << name.names[0] << "`, stream state is bad.";
+                err_msg << "Failed to parse `" << name.name << "`, stream state is bad.";
                 throw Exception(err_msg.str());
             }
 
             if (!stream.eof()) {
                 std::ostringstream err_msg;
-                err_msg << "Failed to parse `" << name.names[0]
+                err_msg << "Failed to parse `" << name.name
                         << "`, not at end of stream, remaining value: `" << stream.str()
                         << "`. Gathered value: `" << val << "`.";
                 throw Exception(err_msg.str());
