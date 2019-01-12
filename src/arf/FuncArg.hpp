@@ -42,11 +42,13 @@ namespace arf {
          *
          * @param stream stream to be parsed.
          */
-        void parse_hook(ArgIterator& iterator) override {
+        void parse_hook(ArgIterator& iterator)  {
             this->func(iterator.get_value<T>(this->name.name));
         };
     };
 
-    template<>
-    void FuncArg<ArgIterator&>::parse_hook(ArgIterator& iterator);
+    template<> inline
+    void FuncArg<ArgIterator&>::parse_hook(ArgIterator& iterator) {
+        this->func(iterator);
+    };
 }
